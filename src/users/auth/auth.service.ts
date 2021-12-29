@@ -1,6 +1,7 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { User } from '../entities/user.entity';
 import { UsersService } from '../users.service';
@@ -9,7 +10,8 @@ import { UsersService } from '../users.service';
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    private userService: UsersService
+    private userService: UsersService,
+    private jwtService: JwtService
   ) { }
 
   async register(name: string, email: string, password: string) {
@@ -28,11 +30,14 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('User not found');
     } else {
-      const { password: userPassword, status } = user
-      
+      const { password: userPassword, status, name, id } = user
+
       if (password === userPassword) {
-        if(status){
+        if (status) {
+          const payload = { name, sub: id };
+          
           return {
+            access_token: this.jwtService.sign({name, sub: id}),
             message: 'Logged in successfully!',
             status: 200
           }
@@ -48,5 +53,16 @@ export class AuthService {
         }
       }
     }
+  }
+
+  async validateUser(email: string, password: string): Promise<any> {
+    const user = await await this.userService.findByEmail(email);
+    const { password: userPassword } = user
+
+    if (userPassword === password) {
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
   }
 }
