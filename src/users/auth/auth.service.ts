@@ -6,6 +6,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 
 import { User } from '../entities/user.entity';
 import { UsersService } from '../users.service';
+import { MailerService } from 'src/mailer/mailer.service';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,7 @@ export class AuthService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private userService: UsersService,
     private jwtService: JwtService,
+    private mailerService: MailerService,
   ) { }
 
   async register(name: string, email: string, password: string) {
@@ -22,7 +24,13 @@ export class AuthService {
       throw new ConflictException('User already exists!')
     }
 
-    return await this.userRepository.save({ name, email, password, status: 0 });
+    await this.userRepository.save({ name, email, password, status: 0 });
+    this.mailerService.sendEmailInvite(email);
+
+    return {
+      message: 'Signed up successfully, email sent',
+      status: 400
+    }
   }
 
   async login(email: string, password: string) {

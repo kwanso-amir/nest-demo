@@ -3,11 +3,12 @@ import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 
 import { User } from '../entities/user.entity';
+import { MailerService } from 'src/mailer/mailer.service';
 
 @EventSubscriber()
 export class UserSubscriber implements EntitySubscriberInterface<User> {
   constructor(private readonly connection: Connection,
-    private readonly configService: ConfigService
+    private readonly mailerService: MailerService
   ) {
     this.connection.subscribers.push(this);
   }
@@ -21,25 +22,22 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
   }
 
   async beforeUpdate(event: UpdateEvent<User>): Promise<void> {
-    // const emailGotUpdated = event.updatedColumns.find(value => value.propertyName, User.prototype.email);
-    // const passwordGotUpdated = event.updatedColumns.find(value => value.propertyName, User.prototype.password);
-    // if (emailGotUpdated) {
-    //   if (event.databaseEntity.email !== event.entity.email) {
-    //     const user = event.entity
-    //     const isInvestor = user && user.roles.some(role => role.role.includes('investor' || 'owner'))
-    //     Logger.log(`Email changed from 
-    //     ${event.databaseEntity.email} to 
-		// 		${event.entity.email}`, 'Email Got Updated');
-    //     event.entity.emailVerified = false;
-    //     this.mailerSerivce.sendVerificationEmail(user.email, user.fullName, user.id, isInvestor)
-    //   }
-    // }
-    // if (passwordGotUpdated && event.entity.password) {
-    //   const hashedPassword = await bcrypt.hash(event.entity.password, await bcrypt.genSalt());
-    //   if (event.databaseEntity.password !== event.entity.password) {
-    //     Logger.log(`Password changed from ${event.databaseEntity.password} to ${hashedPassword}`, 'Password Got Updated');
-    //     event.entity.password = hashedPassword;
-    //   }
-    // }
+    const emailGotUpdated = event.updatedColumns.find(value => value.propertyName, User.prototype.email);
+    const passwordGotUpdated = event.updatedColumns.find(value => value.propertyName, User.prototype.password);
+    const {email, password} = event.entity
+    if (emailGotUpdated) {
+      if (event.databaseEntity.email !== email) {
+        event.entity.status = 0;
+        
+        this.mailerService.sendVerificationEmail(email)
+      }
+    }
+    if (passwordGotUpdated && password) {
+      const hashedPassword = await bcrypt.hash(password, await bcrypt.genSalt());
+      if (event.databaseEntity.password !== password) {
+        this.mailerService.sendPasswordChangeEmail(email)
+        event.entity.password = hashedPassword;
+      }
+    }
   }
 }

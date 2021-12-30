@@ -9,6 +9,7 @@ import { User } from './../entities/user.entity';
 import { LocalStrategy } from './local.strategy';
 import { UsersService } from './../users.service';
 import { AuthController } from './auth.controller';
+import { MailerModule } from 'src/mailer/mailer.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AuthController } from './auth.controller';
       signOptions: { expiresIn: '1h' },
       secretOrPrivateKey: process.env.SECRET_KEY || 'nestDemoSecretKey'
     }),
+    MailerModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, UsersService, LocalStrategy, JwtStrategy],
