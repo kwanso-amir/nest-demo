@@ -21,7 +21,6 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
   }
 
   async beforeUpdate(event: UpdateEvent<User>): Promise<void> {
-    console.log("beforeUpdate >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     // const emailGotUpdated = event.updatedColumns.find(value => value.propertyName, User.prototype.email);
     // const passwordGotUpdated = event.updatedColumns.find(value => value.propertyName, User.prototype.password);
     // if (emailGotUpdated) {
