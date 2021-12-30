@@ -38,6 +38,12 @@ export class UsersService {
     }
 
     if (email) {
+      const otherUser = await this.userRepository.findOne({ email });
+
+      if (otherUser) {
+        throw new ConflictException('User already exists!')
+      }
+
       updatedUser = { ...updatedUser, email };
     }
 

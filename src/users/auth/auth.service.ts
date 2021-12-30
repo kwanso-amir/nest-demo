@@ -1,3 +1,4 @@
+import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,7 +12,7 @@ export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private userService: UsersService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) { }
 
   async register(name: string, email: string, password: string) {
@@ -30,25 +31,13 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('User not found');
     } else {
-      const { password: userPassword, status, name, id } = user
+      const { status } = user
 
-      if (password === userPassword) {
-        if (status) {
-          const payload = { name, sub: id };
-          
-          return {
-            access_token: this.jwtService.sign({name, sub: id}),
-            message: 'Logged in successfully!',
-            status: 200
-          }
-        }
-        return {
-          message: 'User not active!',
-          status: 400
-        }
+      if (status) {
+        return this.createToken(user, password);
       } else {
         return {
-          message: 'Wrong password!',
+          message: 'User is not active',
           status: 400
         }
       }
@@ -65,4 +54,27 @@ export class AuthService {
     }
     return null;
   }
+
+  async createToken(user: User, paramPass: string) {
+    const { id, email, password } = user;
+    const passwordMatch = await bcrypt.compare(paramPass, password)
+
+    if (passwordMatch) {
+      const payload = { email, sub: id };
+
+      return {
+        access_token: this.jwtService.sign(payload),
+        response: {
+          message: "OK", status: 200, name: "Token Created"
+        }
+      };
+    } else {
+      return {
+        response: {
+          message: "Incorrect Email or Password", status: 404, name: "Email or Password invalid"
+        }, access_token: null
+      };
+    }
+  }
+
 }
