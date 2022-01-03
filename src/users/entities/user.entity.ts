@@ -1,5 +1,6 @@
+import { Exclude } from 'class-transformer';
 import { Post } from 'src/posts/posts.entity';
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn, } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn, } from 'typeorm';
 
 export enum UserStatus {
   DEACTIVATED = 0,
@@ -20,16 +21,16 @@ export class User {
   @Column({ nullable: false })
   email: string;
 
-  @Column({ nullable: false, select: false })
+  @Exclude()
+  @Column({ nullable: false })
   password: string;
 
-  @ManyToOne(type => Post, post => post.user, { eager: true })
-  @JoinTable({ name: 'Posts' })
+  @OneToMany(() => Post, post => post.user, { eager: true })
   posts: Post[];
 
-  @CreateDateColumn({ type: 'timestamptz', select: false })
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: string;
 
-  @UpdateDateColumn({ type: 'timestamptz', select: false })
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: string;
 }

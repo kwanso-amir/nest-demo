@@ -3,14 +3,15 @@ import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 
 import { Post, PostStatus } from "./posts.entity";
+import { PostResponseInterface } from "src/interfaces";
 
 @Injectable()
 export class PostsService {
   constructor(@InjectRepository(Post) private readonly postRepository: Repository<Post>) { }
 
-  async getPosts() {
+  async getPosts(): Promise<PostResponseInterface> {
     try {
-      const posts = this.findPosts(PostStatus.PUBLISHED)
+      const posts = await this.findPosts(PostStatus.PUBLISHED)
 
       return {
         status: 200,
@@ -22,9 +23,9 @@ export class PostsService {
     }
   }
 
-  async getPost(id: string) {
+  async getPost(id: string): Promise<PostResponseInterface> {
     try {
-      const post = this.findPostById(id)
+      const post = await this.findPostById(id)
 
       return {
         status: 200,
@@ -36,9 +37,9 @@ export class PostsService {
     }
   }
 
-  async getUserPosts(userId: string) {
+  async getUserPosts(userId: string): Promise<PostResponseInterface> {
     try {
-      const posts = this.findPostByUser(userId)
+      const posts = await this.findPostByUser(userId)
 
       return {
         status: 200,
@@ -50,9 +51,9 @@ export class PostsService {
     }
   }
 
-  async getUnpublishedPosts() {
+  async getUnpublishedPosts(): Promise<PostResponseInterface> {
     try {
-      const posts = this.findPosts(PostStatus.UNPUBLISHED)
+      const posts = await this.findPosts(PostStatus.UNPUBLISHED)
 
       return {
         status: 200,
@@ -64,7 +65,7 @@ export class PostsService {
     }
   }
 
-  async createPost(description: string, userId: string) {
+  async createPost(description: string, userId: string): Promise<PostResponseInterface> {
     try {
       const post = await this.postRepository.save({ description, userId })
 
@@ -78,7 +79,7 @@ export class PostsService {
     }
   }
 
-  async updatePost(id: string, description: string) {
+  async updatePost(id: string, description: string): Promise<PostResponseInterface> {
     try {
       const post = await this.findPostById(id);
 
@@ -93,7 +94,7 @@ export class PostsService {
     }
   }
 
-  async publishPost(id: string) {
+  async publishPost(id: string): Promise<PostResponseInterface> {
     try {
       const post = await this.findPostById(id);
       const { status } = post;
@@ -116,7 +117,7 @@ export class PostsService {
     }
   }
 
-  async unpublishPost(id: string) {
+  async unpublishPost(id: string): Promise<PostResponseInterface> {
     try {
       const post = await this.findPostById(id);
       const { status } = post
@@ -139,7 +140,7 @@ export class PostsService {
     }
   }
 
-  async deletePost(id: string) {
+  async deletePost(id: string): Promise<PostResponseInterface> {
     try {
       const post = await this.findPostById(id);
       await this.postRepository.delete(id)
@@ -155,7 +156,7 @@ export class PostsService {
 
 
   // Helper methods
-  async findPostById(id: string) {
+  async findPostById(id: string): Promise<Post> {
     const post = await this.postRepository.findOne(id)
 
     if (!post) {
@@ -165,7 +166,7 @@ export class PostsService {
     return post;
   }
 
-  async findPostByUser(userId: string) {
+  async findPostByUser(userId: string): Promise<Post[]> {
     const posts: Post[] = await this.postRepository.find({ where: { userId } })
 
     if (!posts) {
@@ -175,7 +176,7 @@ export class PostsService {
     return posts;
   }
 
-  async findPosts(status: PostStatus) {
+  async findPosts(status: PostStatus): Promise<Post[]> {
     try {
       return await this.postRepository.find({ where: { status } })
     } catch (error) {

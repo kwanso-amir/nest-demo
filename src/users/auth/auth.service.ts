@@ -65,7 +65,7 @@ export class AuthService {
       return {
         access_token: this.jwtService.sign(payload),
         response: {
-          message: "OK", status: 200, name: "Token Created"
+          message: "OK", status: 200, name: "Token Created!"
         }
       };
     } else {

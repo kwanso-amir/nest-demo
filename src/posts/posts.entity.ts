@@ -17,9 +17,12 @@ export class Post {
   @Column({ type: 'enum', enum: PostStatus, default: PostStatus.UNPUBLISHED, })
   status: PostStatus;
 
-  @ManyToOne(type => User, user => user.posts)
+  @ManyToOne(() => User, user => user.posts)
   @JoinTable({ name: 'Users' })
   user: User;
+
+  @Column({ nullable: false })
+  userId: string;
 
   @CreateDateColumn({ type: 'timestamptz', select: false })
   createdAt: string;
