@@ -1,4 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -9,6 +10,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private jwtService: JwtService,
   ) { }
 
   async createUser(name: string, email: string, password: string) {
@@ -130,5 +132,12 @@ export class UsersService {
 
   async alreadyExists?(email: string) {
     return await this.userRepository.findOne({ email });
+  }
+
+  async verify(token: string) {
+    console.log("startings")
+    console.log(await this.jwtService.verify(token), "-------------------")
+    const secret = await this.jwtService.verify(token);
+    return { ...secret };
   }
 }

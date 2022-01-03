@@ -142,7 +142,6 @@ export class PostsService {
 
   async deletePost(id: string): Promise<PostResponseInterface> {
     try {
-      const post = await this.findPostById(id);
       await this.postRepository.delete(id)
 
       return {
@@ -182,5 +181,10 @@ export class PostsService {
     } catch (error) {
       throw new NotFoundException('Posts not found!');
     }
+  }
+
+  async currentUserPost(id: string): Promise<boolean> {
+    const { userId } = await this.findPostById(id);
+    return false
   }
 }
