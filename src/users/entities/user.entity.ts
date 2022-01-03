@@ -1,10 +1,5 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Transform } from 'class-transformer';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, } from 'typeorm';
 
 export enum UserStatus {
   DEACTIVATED = 0,
@@ -19,18 +14,19 @@ export class User {
   @Column({ nullable: false })
   name: string;
 
-  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
+  @Transform(({ value }) => UserStatus[value])
+  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE, })
   status: UserStatus;
 
   @Column({ nullable: false })
   email: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, select: false })
   password: string;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ type: 'timestamptz', select: false })
   createdAt: string;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn({ type: 'timestamptz', select: false })
   updatedAt: string;
 }
