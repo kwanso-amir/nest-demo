@@ -15,11 +15,12 @@ import { AuthController } from './auth.controller';
     TypeOrmModule.forFeature([User]), PassportModule,
     JwtModule.register({
       secret: process.env.SECRET_KEY || 'nestDemoSecretKey',
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '24h' },
       secretOrPrivateKey: process.env.SECRET_KEY || 'nestDemoSecretKey'
     }),
   ],
   controllers: [AuthController],
   providers: [AuthService, UsersService, LocalStrategy, JwtStrategy],
+  exports: [AuthService]
 })
 export class AuthModule { }

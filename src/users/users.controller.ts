@@ -1,5 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/jwt-auth-guard';
+import { RoleGuard } from './auth/role.guard';
+import { UserGuard } from './auth/user.guard';
 
 import { UsersService } from './users.service';
 
@@ -7,7 +9,7 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private userService: UsersService) { }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, UserGuard)
   @Post()
   createUser(
     @Body('name') name: string,
@@ -17,18 +19,19 @@ export class UsersController {
     return this.userService.createUser(name, email, password);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, UserGuard, RoleGuard)
   @Get()
   getUsers() {
     return this.userService.getUsers();
   }
 
+  @UseGuards(JwtAuthGuard, UserGuard)
   @Get(':id')
   getUser(@Param('id') id: string) {
     return this.userService.getUser(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, UserGuard)
   @Patch(':id')
   updateUser(
     @Param('id') id: string,
@@ -38,25 +41,25 @@ export class UsersController {
     return this.userService.updateUser(id, name, email);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, UserGuard)
   @Delete(':id')
   deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, UserGuard)
   @Post('change-password')
   changePassword(@Body('email') email: string, @Body('password') password: string, @Body('newPassword') newPassword: string) {
     return this.userService.changePassword(email, password, newPassword)
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, UserGuard)
   @Patch('activate/:id')
   activateUser(@Param('id') id: string) {
     return this.userService.activateUser(id)
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, UserGuard)
   @Patch('deactivate/:id')
   deactivateUser(@Param('id') id: string) {
     return this.userService.deactivateUser(id)

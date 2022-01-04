@@ -1,5 +1,7 @@
-import { Transform } from 'class-transformer';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, } from 'typeorm';
+import { Exclude, Transform } from 'class-transformer';
+import { Post } from 'src/posts/posts.entity';
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn, } from 'typeorm';
+import { Role } from './role.entity';
 
 export enum UserStatus {
   DEACTIVATED = 0,
@@ -14,19 +16,31 @@ export class User {
   @Column({ nullable: false })
   name: string;
 
-  @Transform(({ value }) => UserStatus[value])
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE, })
+  @Transform(({ value }) => UserStatus[value]  )
   status: UserStatus;
 
   @Column({ nullable: false })
   email: string;
 
-  @Column({ nullable: false, select: false })
+  @Exclude()
+  @Column({ nullable: false })
   password: string;
 
-  @CreateDateColumn({ type: 'timestamptz', select: false })
+  @Column({ nullable: false })
+  roleId: string;
+
+  @Exclude()
+  @OneToMany(() => Post, post => post.user, { eager: true })
+  posts: Post[];
+
+  @ManyToOne(() => Role, role => role.users, { eager: true })
+  @Transform(({ value }) => value.role  )
+  role: Role;
+
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: string;
 
-  @UpdateDateColumn({ type: 'timestamptz', select: false })
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: string;
 }
