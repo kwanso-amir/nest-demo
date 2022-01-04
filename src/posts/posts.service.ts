@@ -75,6 +75,7 @@ export class PostsService {
         message: "Post create successfully!",
       }
     } catch (error) {
+      console.log(error)
       throw new BadRequestException('Something went wrong!')
     }
   }

@@ -4,8 +4,7 @@ import { AuthService } from "./auth.service";
 
 @Injectable()
 export class UserGuard implements CanActivate {
-  constructor(private authService: AuthService) {
-  }
+  constructor(private authService: AuthService) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = context.switchToHttp()
@@ -13,7 +12,10 @@ export class UserGuard implements CanActivate {
     if (!ctx.getRequest().headers.authorization) {
       return false;
     }
-    context.switchToHttp().getRequest().body = await this.validateToken(ctx.getRequest().headers.authorization);
+
+    let body = ctx.getRequest().body
+    const currentUser = await this.validateToken(ctx.getRequest().headers.authorization);
+    body = { ...body, currentUser }
 
     return true;
   }

@@ -2,7 +2,7 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { User } from '../entities/user.entity';
 import { UsersService } from '../users.service';
@@ -79,7 +79,12 @@ export class AuthService {
 
   // Helper Methods
   async verify(token: string) {
-    const secret = await this.jwtService.verify(token);
-    return { ...secret };
+    const { sub: userId } = await this.jwtService.verify(token);
+    const currentUser = await this.userService.findUser(userId)
+    
+    if (currentUser) {
+      return { ...currentUser };
+    } else
+      throw new ForbiddenException();
   }
 }
