@@ -77,4 +77,9 @@ export class AuthService {
     }
   }
 
+  // Helper Methods
+  async verify(token: string) {
+    const secret = await this.jwtService.verify(token);
+    return { ...secret };
+  }
 }
